@@ -227,7 +227,7 @@ class TestClearInterval(TestCase):
 
 class TestMiddleware(TestCase):
 
-    middleware = middleware.LastSeenMiddleware()
+    middleware = middleware.LastSeenMiddleware(get_response=lambda request: None)
 
     @mock.patch('last_seen.middleware.user_seen', autospec=True)
     def test_process_request(self, user_seen):

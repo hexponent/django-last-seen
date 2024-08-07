@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name='LastSeen',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('module', models.CharField(default=b'default', max_length=20)),
+                ('module', models.CharField(default='default', max_length=20)),
                 ('last_seen', models.DateTimeField(default=django.utils.timezone.now)),
                 ('site', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sites.Site')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),

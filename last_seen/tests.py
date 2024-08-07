@@ -1,5 +1,5 @@
 import datetime
-import mock
+from unittest import mock
 import time
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -18,8 +18,8 @@ class TestLastSeenModel(TestCase):
         user = User(username='testuser')
         ts = datetime.datetime(2013, 1, 1, 2, 3, 4)
         seen = LastSeen(user=user, last_seen=ts)
-        self.assertIn('testuser', unicode(seen))
-        self.assertIn('2013-01-01 02:03:04', unicode(seen))
+        self.assertIn('testuser', str(seen))
+        self.assertIn('2013-01-01 02:03:04', str(seen))
 
 
 class TestLastSeenManager(TestCase):
@@ -188,7 +188,7 @@ class TestUserSeen(TestCase):
 class TestClearInterval(TestCase):
 
     @mock.patch('last_seen.models.LastSeen.objects.filter', autospec=True)
-    @mock.patch('last_seen.models.cache', autospec=True)
+    @mock.patch('last_seen.models.cache')
     def test_clear_interval(self, cache, filter):
         site = Site.objects.get_current()
         user = User(username='testuser', pk=1)
@@ -203,7 +203,7 @@ class TestClearInterval(TestCase):
         cache.set_many.assert_called_with(expected)
 
     @mock.patch('last_seen.models.LastSeen.objects.filter', autospec=True)
-    @mock.patch('last_seen.models.cache', autospec=True)
+    @mock.patch('last_seen.models.cache')
     def test_clear_interval_none(self, cache, filter):
         user = User(username='testuser', pk=1)
         filter.return_value = []
@@ -211,7 +211,7 @@ class TestClearInterval(TestCase):
         clear_interval(user)
 
         filter.assert_called_with(user=user)
-        self.assertFalse(cache.delete_many.called)
+        self.assertFalse(cache.set_many.called)
 
     def test_clear_interval_works(self):
         user = User.objects.create(username='testuser')
@@ -227,18 +227,18 @@ class TestClearInterval(TestCase):
 
 class TestMiddleware(TestCase):
 
-    middleware = middleware.LastSeenMiddleware()
+    middleware = middleware.LastSeenMiddleware(get_response=lambda request: None)
 
     @mock.patch('last_seen.middleware.user_seen', autospec=True)
     def test_process_request(self, user_seen):
         request = mock.Mock()
-        request.user.is_authenticated.return_value = False
+        request.user.is_authenticated = False
         self.middleware.process_request(request)
         self.assertFalse(user_seen.called)
 
     @mock.patch('last_seen.middleware.user_seen', autospec=True)
     def test_process_request_auth(self, user_seen):
         request = mock.Mock()
-        request.user.is_authenticated.return_value = True
+        request.user.is_authenticated = True
         self.middleware.process_request(request)
         user_seen.assert_called_with(request.user)

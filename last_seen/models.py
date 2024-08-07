@@ -67,7 +67,7 @@ class LastSeen(models.Model):
         unique_together = (('user', 'site', 'module'),)
         ordering = ('-last_seen',)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s on %s" % (self.user, self.last_seen)
 
 
